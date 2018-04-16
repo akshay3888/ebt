@@ -1,0 +1,63 @@
+{% extends "eBedTrack/base.html" %}
+  {% block content %}
+
+<div class="container">
+                <div class="page-container">
+                    <h2 class="top-menu">We are located here:</h2>
+                </div>
+
+            <div class="content container">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="links">
+                            <!-- Example row of columns -->
+                            <div class="row">
+                                    <div class="thumbnail" style="padding-bottom: 32px;background-color: white; padding-top: 10px">
+                                        <div class="mapouter">
+                                            <div class="gmap_canvas">
+                                                <!--<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1io_Hh8ezO3y8ar0u0qoZzKoumu4" width="640" height="580"></iframe>-->
+                                                <iframe src="https://www.google.com/maps/d/embed?mid=1tSwUXESWFxF-vWiAlBYJ03sGbczs8v99" width="640" height="580"></iframe>
+                                            </div>
+                                            <style>.mapouter{overflow:hidden;height:430px;width:800px;}.gmap_canvas {background:none!important;height:630px;width:640px;margin-left: 20%}</style>
+                                        </div>
+                                    </div>
+                             </div>
+                                   <form  action="{% url 'eBedTrack:contact_us'%}" method="post"> {% csrf_token %}
+                                           <div class="form-group">
+                                                <label for="firstName">FirstName</label>
+                                               <input type="text" class="form-control" id="firstName" placeholder="FirstName" name="firstName">
+                                            </div>
+                                           <div class="form-group">
+                                                <label for="lastName">LastName</label>
+                                               <input type="text" class="form-control" id="lastName" placeholder="LastName" name="lastName">
+                                            </div>
+                                           <div class="form-group">
+                                                <label for="inputEmail">Email</label>
+                                                <input type="text" class="form-control" id="inputEmail" placeholder="Email" name="inputEmail">
+                                            </div>
+                                                <div class="form-group">
+                                                    <label for="inputquestion">Question</label>
+                                                    <textarea id="inputquestion" class="form-control" id="inputquestion" name="inputquestion"></textarea>
+                                                </div>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                    <!-- <div style="align-content: center; margin-bottom: 50px ">
+                                   <form method="POST" action="contact-us-form" >{% csrf_token %}
+
+                                        {{ form.as_p }}
+
+                                        <button class="btn btn-info" type="submit" style="margin-left: 180px">Submit</button>
+                                    </form>
+                                     </div>-->
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>
+{% endblock %}
+
+
+
+
+

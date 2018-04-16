@@ -1,0 +1,106 @@
+{% extends 'eBedTrack/base.html' %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Emergency Bed Tracking System</title>
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">-->
+</head>
+ <style>
+            #table-wrapper {
+              position:relative;
+            }
+            #table-scroll {
+              height:400px;
+              overflow:auto;
+              margin-top:20px;
+            }
+            #table-wrapper table {
+              width:100%;
+
+            }
+            #table-wrapper tab  le * {
+              color:black;
+            }
+            #table-wrapper table thead th .text {
+              position:absolute;
+              top:-20px;
+              z-index:2;
+              height:20px;
+              width:35%;
+              border:1px solid red;
+            }
+
+        </style>
+
+     <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="panel panel-primary" style="margin-top: ">
+                    <div class="panel-body">
+                        Check the availability of Beds in various Hospitals here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <h2 style="padding-left: 15Px">Hospital Beds Information</h2>
+    </div>
+    <div  id="table-wrapper">
+    <div id="table-scroll">
+
+
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr class="bg-info">
+                <th>Hospital Details</th>
+                <th style="text-align: center">Available Beds</th>
+                <!--<th style="text-align: center">Bed Details</th>-->
+                <th> Actions </th>
+
+            </tr>
+            </thead>
+            <tbody>
+            {% for k,v  in  hospitals.items %}
+                <tr><td>
+                    <br>{{ v.0 }}</br>
+                    {{v.1}}</br>
+                 <b>   Phone No:</b>{{v.2}}
+                    </td>
+                    <td style="text-align: center"><br>{{ v.3 }} </td>
+                    <!--<td style="text-align: center; width: 25%">-->
+                        <!--<table class ="data" style="text-align:center">-->
+                            <!--&lt;!&ndash;<tr>&ndash;&gt;-->
+                                <!--&lt;!&ndash;{% for i in "v"|rjust:"100" %}&ndash;&gt;-->
+                                <!--&lt;!&ndash;<p>BED Type: {{ v.i }} count : {{ v.i }}</p>&ndash;&gt;-->
+                                <!--&lt;!&ndash;{% endfor %}&ndash;&gt;-->
+                            <!--&lt;!&ndash;<tr>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<tr>&ndash;&gt;-->
+                                <!--&lt;!&ndash;{% for i in v|slice:"1:100" %}&ndash;&gt;-->
+                                    <!--&lt;!&ndash;{{ i }} <br>&ndash;&gt;-->
+                                <!--&lt;!&ndash;{% endfor %}&ndash;&gt;-->
+                            <!--&lt;!&ndash;</tr>&ndash;&gt;-->
+                            <!--<tr>-->
+                                <!--{% for i in v|slice:"4:100" %}-->
+                                <!--{{ i}} <br>-->
+                                <!--{% endfor %}-->
+
+                            <!--</tr>-->
+                        <!--</table>-->
+                    <!--</td>-->
+                    <td style="text-align: center; width: 25%">
+                        <br>
+                    <a href="{% url 'eBedTrack:block_bed'  pk=k%}" class="btn btn-warning" name="onclick">Block your Bed Here </a>
+                </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+
+{% endblock %}
