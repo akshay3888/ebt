@@ -20,8 +20,6 @@ msgpack-python==0.4.8
 olefile==0.44
 Pillow==4.3.0
 psycopg2==2.7.1
-pyad==0.5.15
-pypiwin32==220
 pytz==2018.3
 redis==2.10.6
 requests==2.18.4
