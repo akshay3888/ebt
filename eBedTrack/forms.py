@@ -5,7 +5,7 @@ from .models import Hospital, Bed, Patient, Nurse, ContactUs,BlockBed
 class HospitalForm(forms.ModelForm):
     class Meta:
         model = Hospital
-        fields = ('hospital_id','hospital_name', 'address', 'phone_no')
+        fields = ('hospital_id','hospital_name', 'address', 'phone_no','city','county')
 
 class BedForm(forms.ModelForm):
     class Meta:
@@ -21,6 +21,14 @@ class ContactForm(forms.ModelForm):
     class Meta:
         model = ContactUs
         fields = ('firstName', 'lastName', 'inputEmail', 'inputquestion',)
+
+class CitySearchForm(forms.ModelForm):
+    city=forms.CharField(max_length=100,required=True)
+    # county=forms.CharField(max_length=100)
+    class Meta:
+        model=Hospital
+        fields = ('city',)
+
 
 
 class BlockForm(forms.ModelForm):

@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^new_bed/$', views.new_bed, name='new_bed'),
     url(r'^nurse_bed_availability/$', views.nurse_bed_availability, name='nurse_bed_availability'),
     url(r'^bed_availability/$', views.bed_count, name='bed_count'),
+    url(r'^nearby_hospital/$', views.city_search, name='city_search'),
     url(r'^press_report/$', views.press_report, name='press_report'),
 
     url(r'^patient_list/$', views.patient_list, name='patient_list'),
@@ -66,11 +67,15 @@ urlpatterns = [
     url(r'^onclick_update/(?P<phone>[0-9]\d+)/$', views.onclick_update, name='onclick_update'),
     url(r'^onclick_update/([\w.@+-])/$', views.patient_new, name='patient_new'),
 
+    url(r'^city_serach/', views.city_search, name='city_search'),
+
 
     url(r'^block_bed/$', views.block_bed, name='block_bed'),
     #url(r'^block_bed/thanks', views.thanks, name='thanks'),
     url(r'^blockbed_list/$', views.blockbed_list, name='blockbed_list'),
     url(r'^blockbed_list/(?P<pk>\d+)/delete/$', views.blockbed_delete, name='blockbed_delete'),
+
+
 
 
 

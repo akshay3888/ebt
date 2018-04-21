@@ -1,0 +1,56 @@
+{% extends 'eBedTrack/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+                <div class="page-container" style="width: 100%">
+                    <table>
+                        <tr>
+                    <td><img src="../../static/images/Logo-Final.png" style="align-content: center; width: 200px; height: 200px; padding-top: 10px; margin-bottom: 20px"></td>
+                    <td><h2 class="top-menu" style="padding-left: 30px">Welcome to Emergency Bed Tracker!</h2></td>
+                    </tr>
+                    </table>
+                </div>
+
+            <div class="row" style="width: 100%">
+            <div class="col-md-6" style="margin-left: 2%; margin-top: 5%">
+            <div class="content container" style="padding-bottom: 70px">
+                <!--<div class="row">-->
+                    <!--<div class="col-md-8" >-->
+                        <!--<div class="links">-->
+                            <!--&lt;!&ndash; Example row of columns &ndash;&gt;-->
+                            <!--<div class="row" style="padding-right: 5px">-->
+                                <!--<div class="thumbnail">-->
+                                        <!--&lt;!&ndash;&lt;!&ndash;<p><a class="btn btn-primary" href="{% url 'eBedTrack:bed_availability' %}"&ndash;&gt;&ndash;&gt;-->
+                                              <!--&lt;!&ndash;&lt;!&ndash;role="button">View Bed Availability &raquo;</a></p>&ndash;&gt;&ndash;&gt;-->
+                                   <!--&lt;!&ndash;&lt;!&ndash;<div class="mapouter"><div class="gmap_canvas">&ndash;&gt;&ndash;&gt;-->
+                                        <!--&lt;!&ndash;&lt;!&ndash;&lt;!&ndash;<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1tg4D7qillWQL6HCERhxoLdxBsT8" width="640" height="480"></iframe>&ndash;&gt;&ndash;&gt;&ndash;&gt;-->
+                                   <!--&lt;!&ndash;&lt;!&ndash;<iframe width="640" height="480" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/search?q=hospitals%20in%20ventura%20county%20ca&key=AIzaSyB5bDjcKe0nlG9jsaVpuedtOWeyZKdFGt8" allowfullscreen></iframe>&ndash;&gt;&ndash;&gt;-->
+
+                                    <!--&lt;!&ndash;&lt;!&ndash;</div>&ndash;&gt;&ndash;&gt;-->
+                                     <!--&lt;!&ndash;<style>.mapouter{overflow:hidden;height:550px;width:640px;padding-left: 10px; padding-top: 30px}.gmap_canvas {background:none!important;height:630px;width:640px;margin-left: 60px}</style></div>&ndash;&gt;-->
+                               <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <div class="panel panel-danger">
+                       <div class="panel-heading"><h5>Sorry we could not find hospitals in the city you just entered please enter a new city!</h5> </div>
+                    </div>
+                 <div class="row">
+                    <div class="col-md-8" >
+                    <form  action="{% url 'eBedTrack:city_search'%}" method="POST"> {% csrf_token %}
+                    <div class="form-group">
+                        <label for="city">Enter your city to check near by hospitals </label>
+                        <input type="text" class="form-control" id="city" placeholder="Enter City" name="city" required="True">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search Here</button>
+
+                </form>
+                    </div>
+                 </div>
+
+            </div>
+            </div>
+            </div>
+
+
+{% endblock %}

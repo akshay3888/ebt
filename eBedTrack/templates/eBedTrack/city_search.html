@@ -39,9 +39,10 @@
      <div class="container">
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
-                <div class="panel panel-success text-center"  style="margin-top: ">
-                    <div class="panel-heading"><h6> Check the availability of Beds in various Hospitals here</h6> </div>
-
+                <div class="panel panel-success" style="margin-top: ">
+                    <div class="panel-heading text-center">
+                        <h5>Check the availability of Beds in various Hospitals here</h5>
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,20 +61,20 @@
                 <th>Hospital Details</th>
                 <th style="text-align: center">Available Beds</th>
                 <!--<th style="text-align: center">Bed Details</th>-->
-                <th> Actions </th>
-                <th>Directions</th>
+                <th> Directions </th>
+                <th> Actions</th>
 
             </tr>
             </thead>
             <tbody>
             {% for k,v  in  hospitals.items %}
                 <tr><td>
-                    <br>{{ v.0 }}<br>
+                    <br>{{  v.0 }} </br>
                     {{v.1}}</br>
                  <b>   Phone No:</b>{{v.2}}
                     </td>
-                    <td style="text-align: center"><br>{{ v.3 }} </td>
-                    <td><br><a href="{{ v.1|hospital_map }}">View On Maps</a></td>
+                    <td style="text-align: center"><br>{{ v.3 }} </td><br>
+                    <td><br><a href="{{ v.1|hospital_map }}">Get Direction</a></td>
                     <!--<td style="text-align: center; width: 25%">-->
                         <!--<table class ="data" style="text-align:center">-->
                             <!--&lt;!&ndash;<tr>&ndash;&gt;-->
@@ -96,7 +97,8 @@
                     <!--</td>-->
                     <td style="text-align: center; width: 25%">
                         <br>
-                    <a href="{% url 'eBedTrack:block_bed'  pk=k%}" class="btn btn-warning" name="onclick">Block your Bed Here </a>
+                    <a
+                        href="{% url 'eBedTrack:block_bed'  pk=k%}" class="btn btn-warning" name="onclick">Block your Bed Here </a>
                 </td>
                 </tr>
             {% endfor %}

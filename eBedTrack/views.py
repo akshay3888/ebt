@@ -13,6 +13,10 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect
 # from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate, login
+from django.db.models.functions import Upper,Lower
+from django.template.defaultfilters import urlencode,force_escape
+from django.utils.safestring import mark_safe
+from django.db.models import Value
 
 register = template.Library()
 
@@ -33,25 +37,16 @@ def adminlogin(request):
 
 @login_required
 def nurse_home(request):
-    print('inside nurse home')
     user_name = request.user.username
     hos = Hospital.objects.get(hospital_id=str(user_name))
     name = hos.hospital_name
     print('hosp name is h in ' + str(name))
-    # for hosp in Hospital.objects.raw('select hospital_id,hospital_name from eBedTrack_Hospital '
-    # 'where hospital_id=%s',[user_name]):
-    # print('print hospital id ')
-    # print(hosp.hospital_id)
-    # print('The hospital name is ')
-    # print(hosp.hospital_name)
-    # name = hosp.hospital_name
     return render(request, 'eBedTrack/nurse_home.html',
     {'eBedTrack': nurse_home,'hosp_name':name})
 
 
 
 def nurse_bed_availability(request):
-    print('inside hospital_list')
     e=request.user.username
     s=Bed.objects.filter(bh=e).values('bh', 'bed_type').annotate(Count('bed_type'))
     dict={}
@@ -64,7 +59,6 @@ def nurse_bed_availability(request):
             else:
                 c.append(v)
         dict[c[0]]=c[1]
-    print (dict)
     hospitals = Hospital.objects.filter(created_date__lte=timezone.now())
     return render(request, 'eBedTrack/nurse_bed_availability.html',
                   {'s': dict})
@@ -85,8 +79,6 @@ def eBedTrack_administrator(request):
 
 
 def contact_us(request):
-   print('contact us page')
-   print(request.method,'requset is ')
    if request.method == "POST":
        form = ContactForm(request.POST)
        if form.is_valid():
@@ -97,29 +89,153 @@ def contact_us(request):
            created_date=timezone.now()
            contact = ContactUs(firstName=firstName,lastName=lastName,emailId=email,question=question,created_date=created_date)
            contact.save()
-           print('data saved')
            return HttpResponseRedirect('/thanks/')
    else:
-       print('in else block')
        form = ContactForm()
    return render(request, 'eBedTrack/contact_us.html', {'form': form})
+
+def hospitals_by_id(list):
+
+    dict={}
+    for each in list:
+        h = Hospital.objects.filter(hospital_id=each)
+        for i in h:
+            e = Bed.objects.filter(bh_id=str(i),status='VACANT').count()
+            bd=BlockBed.objects.filter(hospital_id_id= str(i),status='Reserved').count()
+            if(e-bd >= 1):
+                hos = Hospital.objects.get(hospital_id=str(i))
+                dict[str(i)]=[hos.hospital_name,hos.address,hos.phone_no]
+
+            # print("Hospitals are :",dict)
+            # print(str(i))
+                e = Bed.objects.filter(bh_id=str(i),status='VACANT').count()
+            # print('count is :',e)
+                hos = Hospital.objects.get(hospital_id=str(i))
+                v = dict.get(str(i))
+
+                v.append(e-bd)
+                dict[str(i)] = v
+                s=Bed.objects.filter(bh=str(i),status='VACANT').values('bh','bed_type').annotate(Count('bed_type'))
+            # print('s value is '+str(s))
+                bedtype={}
+                for j in s:
+                    c=[]
+                    for k,v in j.items():
+                        if k=='bh':
+                            continue
+                        else:
+                            c.append(v)
+                    bedtype[c[0]]=c[1]
+                for k,v in bedtype.items():
+                    s=dict.get(str(i))
+                    s.append(k)
+                    s.append(v)
+
+                    dict[str(i)] = s
+            else:
+                bedtype={}
+        # print('bedtype outside ' +str(dict))
+    return dict
+
+
+def hospitals_in_city(city_name):
+    # print('hospital_in_city')
+    dict={}
+    h = Hospital.objects.filter(city=city_name)
+    for i in h:
+        e = Bed.objects.filter(bh_id=str(i),status='VACANT').count()
+        bd=BlockBed.objects.filter(hospital_id_id= str(i),status='Reserved').count()
+        if(e-bd >= 1):
+            hos = Hospital.objects.get(hospital_id=str(i))
+            dict[str(i)]=[hos.hospital_name,hos.address,hos.phone_no]
+
+            # print("Hospitals are :",dict)
+            # print(str(i))
+            e = Bed.objects.filter(bh_id=str(i),status='VACANT').count()
+            # print('count is :',e)
+            hos = Hospital.objects.get(hospital_id=str(i))
+            v = dict.get(str(i))
+
+            v.append(e-bd)
+            dict[str(i)] = v
+            s=Bed.objects.filter(bh=str(i),status='VACANT').values('bh','bed_type').annotate(Count('bed_type'))
+            bedtype={}
+            for j in s:
+                c=[]
+                for k,v in j.items():
+                    if k=='bh':
+                        continue
+                    else:
+                        c.append(v)
+                bedtype[c[0]]=c[1]
+            for k,v in bedtype.items():
+                s=dict.get(str(i))
+                s.append(k)
+                s.append(v)
+
+                dict[str(i)] = s
+        else:
+            bedtype={}
+    return dict
+
+
+
+def city_search(request):
+    if(request.method=="POST"):
+        final_dict={}
+        form = CitySearchForm(request.POST)
+        # print('method is post')
+        if(form.is_valid()):
+            hosp_dict={}
+            city_name=request.POST.get('city')
+            if (city_name==''):
+                return render(request, 'eBedTrack/bed_availability.html')
+            else:
+                city_name=city_name.upper()
+                # print(city_name)
+                # print('city name to be serached is :',city_name)
+                hosp_dict=hospitals_in_city(city_name)
+                # print('bool of dict ',bool(hosp_dict))
+                if (bool(hosp_dict)==True):
+                    return render(request, 'eBedTrack/city_search.html',
+                    {'hospitals': hosp_dict})
+                else:
+                    result={}
+                    list=[]
+                    loc=Location.objects.all().filter(city=city_name)
+                    if not loc:
+                        return render(request, 'eBedTrack/city_notfound.html')
+
+                    loc2 = Location.objects.filter(state=loc[0].state,county=loc[0].county)
+                    for i in loc2:
+                        otherhosp=Hospital.objects.filter(state=i.state,city=i.city,county=i.county)
+                        for j in otherhosp:
+                            list.append(j.hospital_id)
+                    result=hospitals_by_id(list)
+                    return render(request, 'eBedTrack/nearby_hospital.html',{'hospitals': result})
+        else:
+            form=CitySearchForm()
+            # print('form is invalid')
+            return render(request,'eBedTrack/home.html')
+    else:
+        form = CitySearchForm()
+        return render(request, 'eBedTrack/home.html')
+
+
+
 
 
 
 @login_required
 def patient_list(request):
-    print("inside patient list")
-    print(request.user.username)
-    print("inside patient list")
+
     patient = Patient.objects.filter(hospital_id=request.user.username)
-    print('printing patients ' + str(patient))
     return render(request, 'eBedTrack/patient_list.html', {'patients': patient})
 
 
 @login_required
 def blockbed_list(request):
-    print("inside reservation list")
-    print("Hospital name is -----> ",request.user.username)
+
     user_name=request.user.username
     b=BlockBed.objects.filter(hospital_id_id=user_name).exclude(status="Completed")
     return render(request, 'eBedTrack/blockbed_list.html', {'blockbed': b})
@@ -127,7 +243,6 @@ def blockbed_list(request):
 
 @login_required
 def blockbed_delete(request, pk):
-    print('blockbed delete')
     blockbed = get_object_or_404(BlockBed, pk=pk)
     blockbed.delete()
     return redirect('eBedTrack:blockbed_list')
@@ -144,7 +259,6 @@ def hospital_list(request):
 
 @login_required()
 def nurse_bed_availability(request):
-    print('inside nurse bed availability')
     e=request.user.username
     #bedtype = Bed.objects.raw("select bed_id,bed_type,count(*) from eBedTrack_Bed where status='VACANT' group by bed_type")
     #print('query o/p' +str(bedtype))
@@ -158,26 +272,20 @@ def nurse_bed_availability(request):
             else:
                 c.append(v)
         bedtype[c[0]]=c[1]
-    print (bedtype)
     h = Hospital.objects.all()
-    print('hospital obj'+str(h))
     hospitals = Hospital.objects.filter(created_date__lte=timezone.now())
     return render(request, 'eBedTrack/nurse_bed_availability.html',
                   {'s': bedtype})
 
 @login_required
 def patient_list(request):
-   print("inside patient list")
-   print(request.user.username)
    patient = Patient.objects.filter(hospital_id=request.user.username)
-   # print('printing patients '+str(patient))
    return render(request, 'eBedTrack/patient_list.html', {'patients': patient})
 
 
 
 @login_required()
 def confirm_patient(request):
-    print("patient is admitted ")
     # b=BlockBed.objects.filter(phone_no=phone).update(status="Completed")
 
     un = request.user.username
@@ -186,38 +294,28 @@ def confirm_patient(request):
     if request.method == "POST":
         form = PatientForm(request.POST)
         bid = form.data['bed_id']
-        print('printing bedid from form ' + str(bid))
 
         pbid = str(un) + str(bid)
-        print(form.data)
 
         mutable = request.POST._mutable
 
-        print('mutable :' + str(mutable))
 
         request.POST._mutable = True
         request.POST['bed_id'] = pbid
         request.POST._mutable = mutable
 
         if form.is_valid():
-            print('form is valid')
             patient = form.save(commit=False)
             s = form.cleaned_data.get('patient_tag')
-            print('printing from form - patient_tag ' + str(s))
             patient.created_date = timezone.now()
             hh = Hospital.objects.filter(hospital_id=request.user.username)[0]
             patient.hospital_id = hh
             patient.hospital_id = hh
             patient.save()
             pat = Patient.objects.filter(hospital_id=request.user.username)
-            print('printing pat ' + str(pat))
             h = Hospital.objects.all()
-            print('what is in h ' + str(h))
             hbed = form.cleaned_data.get('bed_id')
-            print('printing from form - bed id ')
-            print(hbed)
             q = Bed.objects.filter(bed_id=str(hbed)).update(status='OCCUPIED')
-            print('updated ')
             return render(request, 'eBedTrack/patient_list.html', {'patients': pat})
         else:
             return render(request, 'eBedTrack/patient_new.html', {'form': form})
@@ -227,48 +325,37 @@ def confirm_patient(request):
 
 
 
+
+
 @login_required()
 def patient_new(request):
     un = request.user.username
-    print(un)
-
-
     if request.method == "POST":
         form = PatientForm(request.POST)
         bid = form.data['bed_id']
-        print('printing bedid from form ' + str(bid))
 
         pbid = str(un) + str(bid)
-        print(form.data)
 
         mutable = request.POST._mutable
 
-        print('mutable :' + str(mutable))
 
         request.POST._mutable = True
         request.POST['bed_id'] = pbid
         request.POST._mutable = mutable
 
         if form.is_valid():
-            print('form is valid')
             patient = form.save(commit=False)
             s = form.cleaned_data.get('patient_tag')
-            print('printing from form - patient_tag ' + str(s))
             patient.created_date = timezone.now()
             hh = Hospital.objects.filter(hospital_id=request.user.username)[0]
-            print('print hh',hh)
             patient.hospital_id = hh
             patient.hospital_id = hh
             patient.save()
             pat = Patient.objects.filter(hospital_id=request.user.username)
-            print('printing pat ' + str(pat))
             h = Hospital.objects.all()
-            print('what is in h ' + str(h))
             hbed = form.cleaned_data.get('bed_id')
-            print('printing from form - bed id ')
-            print(hbed)
+
             q = Bed.objects.filter(bed_id=str(hbed)).update(status='OCCUPIED')
-            print('updated ')
             return render(request, 'eBedTrack/patient_list.html', {'patients': pat})
         else:
             return render(request, 'eBedTrack/patient_new.html', {'form': form})
@@ -282,23 +369,16 @@ def onclick_update(request,phone):
     if(request.method=="POST"):
         patient_new(request)
     else:
-        print("in else ")
         return HttpResponseRedirect("/patient_new")
 
 
 
 @login_required
 def patient_edit(request, pk):
-    print('inside patient_edit')
     patient = get_object_or_404(Patient, pk=pk)
-    print('patient bed id')
-    print(patient.bed_id)
-    print(request.method)
     if request.method == "POST":
-        print('yes its post method')
         form = PatientForm(request.POST, instance=patient)
         if form.is_valid():
-            print('form is valid')
             patient = form.save(commit=False)
             patient.updated_date = timezone.now()
             patient.save()
@@ -311,7 +391,6 @@ def patient_edit(request, pk):
 
             # patient = Patient.objects.filter(created_date__lte=timezone.now())
             patient = Patient.objects.filter(hospital_id=request.user.username)
-            print('patient updated '+ str(patient))
             return render(request, 'eBedTrack/patient_list.html',
                          {'patients': patient})
         else:
@@ -327,12 +406,9 @@ def patient_edit(request, pk):
 def patient_delete(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     Pat=Patient.objects.filter(id=pk).values('bed_id')
-    print (Pat)
     for i in Pat:
         for k,v in i.items():
             Bed.objects.filter(bed_id=v).update(status='VACANT')
-
-    print('Pat is '+str(Pat))
     patient.delete()
 
     return redirect('eBedTrack:patient_list')
@@ -353,7 +429,6 @@ def personal(request):
 
     else:
         form = PersonalForm()
-        # print("Else")
         return render(request, 'eBedTrack/personal.html',
                       {'form': form})
 
@@ -365,31 +440,22 @@ def personal(request):
 def patient_delete(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     Pat = Patient.objects.filter(id=pk).values('bed_id')
-    print(Pat)
     for i in Pat:
         for k, v in i.items():
             Bed.objects.filter(bed_id=v).update(status='VACANT')
-
-    print('Pat is ' + str(Pat))
     patient.delete()
 
     return redirect('eBedTrack:patient_list')
 
 @login_required()
 def new_bed(request):
-    print('inside nurse new bed')
     uname = request.user.username
-    print(uname)
     if request.method == "POST":
-        print('form method is POST')
         form = BedForm(request.POST)
         bid =form.data['bed_id']
-        print('printing bedid from form '+ str(bid))
         pbid = str(uname) + str(bid)
-        print(form.data)
 
         mutable = request.POST._mutable
-        print('mutable :'+ str(mutable))
         request.POST._mutable = True
         request.POST['bed_id'] = pbid
         request.POST._mutable = mutable
@@ -438,23 +504,10 @@ def press_report(request):
     for x in h:
         e = Hospital.objects.get(hospital_name=x.hospital_name)
         dict[e.hospital_name] = e
-        print("print e" , e)
-        print(x)
-        print(dict)
         for y in p:
             pc = Patient.objects.filter(hospital_id=x).count()
             con = Patient.objects.get(patient_tag=str(y))
             pdict[con.condition] = pc
-            print(y)
-
-    # print(dict)
-    # print(p)
-
-    # dict1 = {}
-    # for x in p:
-    #     e1 = Patient.objects.filter(patient_id=x)
-    #     hos1 = Patient.objects.get(patient_id=str(x))
-    #     dict[hos1.condition] = e1
 
     pdict = Patient.objects.all().values('hospital_id', 'condition').annotate(count=Count('condition'))
     hdict = Hospital.objects.all().values('hospital_id', 'hospital_name')
@@ -485,7 +538,6 @@ def bedcount_update(request):
 
 
 def bed_availability(request):
-    print('inside first responder bed_availability')
     h = Hospital.objects.all()
     dict ={}
 
@@ -496,17 +548,13 @@ def bed_availability(request):
             hos = Hospital.objects.get(hospital_id=str(i))
             dict[str(i)]=[hos.hospital_name,hos.address,hos.phone_no]
 
-            print("Hospitals are :",dict)
-            print(str(i))
             e = Bed.objects.filter(bh_id=str(i),status='VACANT').count()
-            print('count is :',e)
             hos = Hospital.objects.get(hospital_id=str(i))
             v = dict.get(str(i))
 
             v.append(e-bd)
             dict[str(i)] = v
             s=Bed.objects.filter(bh=str(i),status='VACANT').values('bh','bed_type').annotate(Count('bed_type'))
-            print('s value is '+str(s))
             bedtype={}
             for j in s:
                 c=[]
@@ -524,9 +572,6 @@ def bed_availability(request):
                 dict[str(i)] = s
         else:
             bedtype={}
-
-    print('bedtype outside ' +str(dict))
-    # hospitals = Hospital.objects.filter(created_date__lte=timezone.now())
     return render(request, 'eBedTrack/bed_availability.html',
                   {'hospitals': dict,'bedtype':bedtype})
 
@@ -535,13 +580,8 @@ def bed_availability(request):
 
 
 def block_bed(request,pk):
-    print('inside blockbed')
-    print(pk)
-    print(request.method,'req method')
     if request.method == "POST":
-        print('im here ')
         form = BlockForm(request.POST)
-        print('valid form',request.method)
         firstName=request.POST.get('firstName')
         lastName= request.POST.get('lastName')
         email=request.POST.get('email')
@@ -552,14 +592,10 @@ def block_bed(request,pk):
         bed_type=request.POST.get('bed_type')
         blockbed = BlockBed(hospital_id_id=str(pk),first_name=firstName,last_name=lastName,email=email,phone_no=phone,message=message,created_date=created_date,status=status)
         blockbed.save()
-        print('data saved')
         return HttpResponseRedirect("/thanks/")
 
     else:
-        print('first else ')
         form=BlockForm()
-        print(form)
-        print('pk',pk)
         return render(request, 'eBedTrack/block_bed.html',{'form': form,'pk':pk} )
 
 
@@ -577,7 +613,6 @@ def view_details(request):
     # return render(request, 'eBedTrack/view_details.html',
     #               {'view_details': view_details})
 
-    print('inside hospital_list')
     hosp = Hospital.objects.all()
     be = Bed.objects.all()
     pdict = {}
@@ -621,13 +656,11 @@ def admin_hospital_new(request):
                          {'hospitals': hospitals})
    else:
        form = HospitalForm()
-       # print("Else")
    return render(request, 'eBedTrack/admin_hospital_new.html', {'form': form})
 
 @permission_required('is_staff')
 def nurse_list(request):
     nurses = Nurse.objects.all()
-    print(nurses)
     return render(request, 'eBedTrack/nurse_list.html', {'nurses': nurses})
 
 
@@ -652,7 +685,6 @@ def nurse_new(request):
                 {'nurses': nurses})
     else:
         form = NurseForm()
-       # print("Else")
         return render(request, 'eBedTrack/nurse_new.html',
                       {'form': form})
 
@@ -660,9 +692,12 @@ def nurse_new(request):
 @login_required
 def foo_view(request):
    if not request.user.is_staff:
-       return render(request, 'eBedTrack/nurse_home.html', {'eBedTrack': nurse_home})
+        user_name = request.user.username
+        hos = Hospital.objects.get(hospital_id=str(user_name))
+        name = hos.hospital_name
+        return render(request, 'eBedTrack/nurse_home.html', {'eBedTrack': nurse_home,'hosp_name':name,})
    else:
-       return render(request, 'eBedTrack/admin_home.html', {'eBedTrack': admin_home})
+        return render(request, 'eBedTrack/admin_home.html', {'eBedTrack': admin_home})
 
 
 
@@ -695,7 +730,6 @@ def admin_hospital_edit(request, pk):
            hospitals = Hospital.objects.filter(created_date__lte=timezone.now())
            return render(request, 'eBedTrack/admin_hospital_list.html', {'hospitals': hospitals})
    else:
-       # print("else")
        form = HospitalForm(instance = hospital)
    return render(request, 'eBedTrack/admin_hospital_edit.html', {'form': form})
 
@@ -718,6 +752,5 @@ def nurse_edit(request, pk):
            nurses = Nurse.objects.filter(created_date__lte=timezone.now())
            return render(request, 'eBedTrack/nurse_list.html', {'nurses': nurses})
    else:
-       # print("else")
        form = NurseForm(instance = nurse)
    return render(request, 'eBedTrack/nurse_edit.html', {'form': form})

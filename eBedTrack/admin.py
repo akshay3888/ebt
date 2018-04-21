@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Patient, Nurse, Hospital, Administrator, Bed, ContactUs,BlockBed
+from .models import Patient, Nurse, Hospital, Administrator, Bed, ContactUs,BlockBed,Location
 # Register your models here.
 
 
@@ -11,7 +11,7 @@ class PatientList(admin.ModelAdmin):
 
 
 class HospitalList(admin.ModelAdmin):
-    list_display = ('hospital_id','hospital_name', 'address', 'phone_no')
+    list_display = ('hospital_id','hospital_name', 'address', 'phone_no','city','county')
     list_filter = ('hospital_name', 'phone_no')
     search_fields = ('hospital_name', 'address')
     ordering = ['hospital_name']
@@ -30,6 +30,11 @@ class BedList(admin.ModelAdmin):
     search_fields = ('bed_id', 'bed_type','bed_count')
     ordering = ['bed_type']
 
+
+class LocationList(admin.ModelAdmin):
+    list_display = ('city','state','county')
+    list_filter = ('state','county')
+    ordering = ['state']
 
 class AdminList(admin.ModelAdmin):
     list_display = ('admin_id', 'admin_name')
@@ -56,5 +61,6 @@ admin.site.register(Administrator,AdminList)
 admin.site.register(Bed, BedList)
 admin.site.register(ContactUs, ContactUsList)
 admin.site.register(BlockBed,BlockBedList)
+admin.site.register(Location,LocationList)
 
 

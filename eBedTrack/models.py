@@ -126,11 +126,17 @@ class Bed(models.Model):
 class Hospital(models.Model):
     hospital_id = models.CharField(primary_key=True,max_length=100)
     hospital_name = models.CharField(max_length=100)
+    city = models.CharField(max_length=100,default='UNKNOWN')
+    county=models.CharField(max_length=100,null=False,default='UNKNOWN')
+    state= models.CharField(max_length=100,null=False,default='UNKNOWN')
     address = models.CharField(max_length=250)
     phone_no = models.CharField(max_length=12)
     created_date = models.DateField(default=timezone.now)
 
     def __str__(self):
+        self.city=self.city.upper()
+        self.county=self.county.upper()
+        self.state=self.state.upper()
         self.save()
         return str(self.hospital_id)
 
@@ -198,6 +204,20 @@ class BlockBed(models.Model):
 
     def __str__(self):
         self.save()
+        self.created_date = timezone.now()
+        return str(self.created_date)
+
+class Location(models.Model):
+    city = models.CharField(max_length=300,null=False)
+    county = models.CharField(max_length=300,null=False)
+    state = models.CharField(max_length=300,null=False)
+    created_date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        self.save()
+        self.city=self.city.upper()
+        self.county=self.county.upper()
+        self.state=self.state.upper()
         self.created_date = timezone.now()
         return str(self.created_date)
 
