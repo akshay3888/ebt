@@ -28,7 +28,7 @@ simplejson==3.11.1
 six==1.11.0
 Twisted==17.9.0
 txaio==2.8.2
-urllib3==1.22
+urllib3==1.26.5
 whitenoise==3.3.0
 xlrd==1.1.0
 yahoo-finance==1.4.0
