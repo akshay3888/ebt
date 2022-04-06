@@ -26,7 +26,7 @@ requests==2.18.4
 selenium==3.7.0
 simplejson==3.11.1
 six==1.11.0
-Twisted==17.9.0
+Twisted==22.2.0
 txaio==2.8.2
 urllib3==1.22
 whitenoise==3.3.0
